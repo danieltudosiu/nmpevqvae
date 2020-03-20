@@ -1,6 +1,8 @@
 # Neuromorphologicaly-preserving Volumetric data encoding using VQ-VAE
 # !!! THIS IS A PORT IN PROGRESS FROM TENSORFLOW TO PYTORCH !!!
-## To Do
+## To Do - x (in progress) - v (done)
+[x] Profile code to find out why is so slow
+
 [] Finish coding the testing and results extraction
 
 [] Enable command line args  
