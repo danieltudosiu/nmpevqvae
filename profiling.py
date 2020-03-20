@@ -2,7 +2,9 @@ from os import fsdecode
 from os import listdir
 from os.path import join
 
+import numpy as np
 import torch
+
 from torch.autograd.profiler import emit_nvtx
 from torch.cuda.profiler import profile
 from torch.cuda import synchronize
@@ -17,7 +19,6 @@ from apex import pyprof
 
 from losses import BaurLoss
 from vq_vae import VectorQuantizedVAE
-
 
 def get_data_loader(data_path, batch_size):
     subjects = []
@@ -41,18 +42,13 @@ device = "cuda:1"
 warm_up_iterations = 20
 benchmark_iterations = 100
 
-data_loader = get_data_loader(
-    "/raid/danieltudosiu/datasets/neuro_morphology/healthy/train_192", 3
-)
-batch = iter(data_loader).__next__()
-input = batch["t1"]["data"].to(device)
+input = torch.Tensor(np.random.random((3,1,192,256,192))).to(device)
 
 model = VectorQuantizedVAE()
 model = model.to(device)
 
 loss_function = BaurLoss(
     lambda_reconstruction=1,
-    # This will be automatically calculated before each iteration
     lambda_gdl=0,
 )
 
