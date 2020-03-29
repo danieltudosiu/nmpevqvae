@@ -525,7 +525,17 @@ class AdaptiveImageLossFunction(nn.Module):
 
 
 class AdaptiveVolumeLossFunction(nn.Module):
-    """A wrapper around AdaptiveLossFunction for handling volumes."""
+    """Sets up the adaptive form of the robust loss on a set of Volumes.
+
+    This function is a wrapper around AdaptiveLossFunction. It requires inputs
+    of a specific shape and size, and constructs internal parameters describing
+    each non-batch dimension.
+
+    Args:
+      image_size: The size (depth, width, height, num_channels) of the input images.
+      float_dtype: The dtype of the floats used as input.
+      device: The device to use.
+    """
 
     def __init__(self, image_size, device, float_dtype=np.float32, **kwargs):
         super(AdaptiveVolumeLossFunction, self).__init__()
@@ -566,27 +576,35 @@ class AdaptiveVolumeLossFunction(nn.Module):
 
         # Reshape the loss function's outputs to have the shapes as the input.
         loss = torch.reshape(loss_mat, [-1] + list(self.image_size))
+
         return loss
 
     def alpha(self):
-        assert not self.use_students_t
         return torch.reshape(self.adaptive_lossfun.alpha(), self.image_size)
 
     def scale(self):
         return torch.reshape(self.adaptive_lossfun.scale(), self.image_size)
 
     def transform_to_mat(self, x):
+        """Transforms a batch of images to a volume."""
+
         assert len(x.shape) == 5
+
         x = torch.as_tensor(x)
 
-        _, features, depth, width, height = x.shape
+        # Reshape `x` from
+        #   (num_batches, depth, width, height, num_channels) to
+        #   (num_batches * num_channels, width, height, depth)
+        _, depth, width, height, num_channels = x.shape
 
-        x_stack = torch.reshape(x, (-1, depth, width, height))
+        x_stack = torch.reshape(x.permute(0, 4, 1, 2, 3), (-1, depth, width, height))
 
         x_stack = util.volume_dct(x_stack)
 
         x_mat = torch.reshape(
-            torch.reshape(x_stack, (-1, features, depth, width, height)),
-            [-1, width * height * depth * features],
+            torch.reshape(x_stack, (-1, num_channels, depth, width, height)).permute(
+                0, 2, 3, 4, 1
+            ),
+            [-1, width * height * depth * num_channels],
         )
         return x_mat

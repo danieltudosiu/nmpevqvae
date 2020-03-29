@@ -5,6 +5,7 @@ chardet==3.0.4
 Click==7.0
 cycler==0.10.0
 decorator==4.4.2
+dict-digger==0.2.1
 future==0.18.2
 google-auth==1.11.2
 google-auth-oauthlib==0.4.1
@@ -23,7 +24,6 @@ numpy==1.18.1
 oauthlib==3.1.0
 pandas==1.0.1
 Pillow==7.0.0
-pkg-resources==0.0.0
 proglog==0.1.9
 protobuf==3.11.3
 pyasn1==0.4.8

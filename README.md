@@ -1,21 +1,33 @@
-# Neuromorphologicaly-preserving Volumetric data encoding using VQ-VAE
-# !!! THIS IS A PORT IN PROGRESS FROM TENSORFLOW TO PYTORCH !!!
-## To Do - x (in progress) - v (done)
-[x] Profile code to find out why is so slow
+# Neuromorphologicaly Preserving Volumetric Data Encoding Using VQ-VAE
 
-[] Finish coding the testing and results extraction
+This is a PyTorch port for the TensorFlow implementation of Neuromorphologicaly-preserving Volumetric data encoding using VQ-VAE.
 
-[] Enable command line args  
+I have not yet recreated the experiments from my paper. I am in the process of doing so for the 192x256x192 ones since they are of the most interest to the community. Once they are done I will also release pre-trained models as checkpoints for this repo.
 
-[] Clean, comment and refractor the code
+## How to install  
 
-[] Write the how to use section and create a small notebook about it
+I assume you are running a system Python version 3.6, otherwise please create a virtual environment with Python 3.6 
 
-[] Release pretrained Healthy & Pathological-Finetuned models
-  
-## How to use
+```bash
+git clone https://github.com/danieltudosiu/nmpevqvae.git 
+cd nmpevqvae
+python -m venv venv
+source ./venv/bin/activate
+pip install -r requirements.txt
 
-To be completed
+cd ../
+git clone https://github.com/NVIDIA/apex
+cd apex
+pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./
+```
+
+## Experiments
+Overall command is:
+```bash
+python3 experiment.py --training_data_directory /path/to/healthy/training/dataset/ --testing_data_directory /path/to/healthy/testing/dataset/ --project_directory /path/to/project/output/directory/ --experiment_name adaptive --device 1 --mode Training --starting_iteration -1 --epochs 20000 -log_every 10000 --checkpoint_every 10000 --checkpoint_last 5 --batch_size 2 --learning_rate 0.0001 --loss Baur --reconstruction_lambda 1.0 --zero_image_gradient_loss 100000 --one_image_gradient_loss 10000 --max_image_gradient_loss 5 --first_decay_steps 6480 --alpha 0.0000001 --t_mul 1.25 --m_mul 0.95
+```
+
+For fine-tuning please copy the baseline experiment directory, rename it, and start from it by changing the ``--starting_iteration`` to ``-1`` and ``--project_directory`` to the newly renamed folder
 
 ## Citing
 ### Harvard
@@ -35,7 +47,7 @@ Tudosiu, P.D., Varsavsky, T., Shaw, R., Graham, M., Nachev, P., Ourselin, S., Su
 
 ## Contact
 
-For any problems or questions in regards to this project please [open an issue](https://github.com/danieltudosiu/nmcvqvae/issues/new) in github.
+For any problems or questions in regards to this project please [open an issue](https://github.com/danieltudosiu/nmpevqvae/issues/new) in github.
 
 For collaboration purposes please [e-mail me](mailto:petru.tudosiu@kcl.ac.uk).
 
