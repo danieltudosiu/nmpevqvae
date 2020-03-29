@@ -1,7 +1,6 @@
 from torch import cat
 from torch import tensor
 from torch import reshape
-from torch import isfinite
 from torch.nn import PairwiseDistance
 
 from robust_loss.robust_loss_pytorch.adaptive import AdaptiveVolumeLossFunction
@@ -41,7 +40,11 @@ class AdaptiveLoss(object):
                         loss_total += network_outputs[key]
 
                     summaries[
-                        ("summaries", "scalar", "L2-VQ_" + str.upper(str(key[0])) + "-Loss")
+                        (
+                            "summaries",
+                            "scalar",
+                            "L2-VQ_" + str.upper(str(key[0])) + "-Loss",
+                        )
                     ] = network_outputs[key]
 
         loss_total += adaptive_loss
@@ -118,7 +121,11 @@ class BaurLoss(object):
                         loss_total += network_outputs[key]
 
                     summaries[
-                        ("summaries", "scalar", "L2-VQ_" + str.upper(str(key[0])) + "-Loss")
+                        (
+                            "summaries",
+                            "scalar",
+                            "L2-VQ_" + str.upper(str(key[0])) + "-Loss",
+                        )
                     ] = network_outputs[key]
 
         loss_total += l1_reconstruction + l2_reconstruction + l1_gdl + l2_gdl
@@ -153,9 +160,7 @@ class BaurLoss(object):
         dz = reshape(dz, input_shape)
 
         dyz = tensor(()).new_zeros(
-            (batch_size, features, depth, 1, width),
-            device=image.device,
-            dtype=dy.dtype
+            (batch_size, features, depth, 1, width), device=image.device, dtype=dy.dtype
         )
         dy = cat([dy, dyz], 3)
         dy = reshape(dy, input_shape)
@@ -163,7 +168,7 @@ class BaurLoss(object):
         dxz = tensor(()).new_zeros(
             (batch_size, features, depth, height, 1),
             device=image.device,
-            dtype=dx.dtype
+            dtype=dx.dtype,
         )
         dx = cat([dx, dxz], 4)
         dx = reshape(dx, input_shape)

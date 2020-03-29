@@ -7,7 +7,9 @@ import torch
 import numpy as np
 import torchio
 
-from experiment import TRAINING
+
+TRAINING = "Training"
+INFERENCE = "Inference"
 
 
 def visualisation_normalisation(input_tensor):
@@ -150,8 +152,10 @@ def get_torch_device(device):
         raise ValueError("You have not passed a GPU index.")
     else:
         try:
+            print(int(device))
             torch.cuda.set_device(int(device))
             torch_device = torch.device("cuda")
+            print(torch_device)
         except ValueError:
             raise ValueError(
                 "The device you have passed is not the index of a single GPU. Please pass and integer index of a single GPU."
