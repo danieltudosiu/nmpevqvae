@@ -137,9 +137,6 @@ class BaurLoss(object):
 
     @staticmethod
     def __image_gradients(image):
-        # Ported from Tensorflow
-        # https://github.com/tensorflow/tensorflow/blob/v2.1.0/tensorflow/python/ops/image_ops_impl.py#L3442
-
         input_shape = image.shape
         batch_size, features, depth, height, width = input_shape
 

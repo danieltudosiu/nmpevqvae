@@ -14,8 +14,6 @@ EPOCH_DEPRECATION_WARNING = (
 
 
 class CosineDecayRestarts(_LRScheduler):
-    # Ported from TensorFlow
-    # https://github.com/tensorflow/tensorflow/blob/v2.1.0/tensorflow/python/keras/optimizer_v2/learning_rate_schedule.py#L606
     def __init__(
         self,
         optimizer,

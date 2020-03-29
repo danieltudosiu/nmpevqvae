@@ -1,12 +1,10 @@
-import numpy as np
 import torch
+import numpy as np
 
-from torch.autograd.profiler import record_function
-from torch.nn import functional as F
-from torch import nn
+from vector_quantisation.vector_quantisation import VectorQuantizerEMA
 
 
-class VectorQuantizedVAE(nn.Module):
+class VectorQuantizedVAE(torch.nn.Module):
     def __init__(self,):
         super(VectorQuantizedVAE, self).__init__()
         self.num_layers = 23
@@ -60,7 +58,7 @@ class VectorQuantizedVAE(nn.Module):
         return self.decoder(q6, q4, q2)
 
 
-class Encoder(nn.Module):
+class Encoder(torch.nn.Module):
     def __init__(self, num_layers):
         super(Encoder, self).__init__()
 
@@ -127,7 +125,7 @@ class Encoder(nn.Module):
         return e6, e4, e2
 
 
-class Quantization(nn.Module):
+class Quantization(torch.nn.Module):
     def __init__(self, num_layers):
         super(Quantization, self).__init__()
 
@@ -222,7 +220,7 @@ class Quantization(nn.Module):
         return q6, q4, q2, ar
 
 
-class Decoder(nn.Module):
+class Decoder(torch.nn.Module):
     def __init__(self, num_layers):
         super(Decoder, self).__init__()
 
@@ -280,93 +278,8 @@ class Decoder(nn.Module):
 
         return out
 
-
-class VectorQuantizerEMA(nn.Module):
-    # Code taken from:
-    # https://colab.research.google.com/github/zalandoresearch/pytorch-vq-vae/blob/master/vq-vae.ipynb#scrollTo=fknqLRCvdJ4I
-
-    def __init__(
-        self, num_embeddings, embedding_dim, commitment_cost, decay, name, epsilon=1e-5
-    ):
-        super(VectorQuantizerEMA, self).__init__()
-
-        self._embedding_dim = embedding_dim
-        self._num_embeddings = num_embeddings
-
-        self._embedding = nn.Embedding(self._num_embeddings, self._embedding_dim)
-        self._embedding.weight.data.normal_()
-        self._commitment_cost = commitment_cost
-
-        self.register_buffer("_ema_cluster_size", torch.zeros(num_embeddings))
-        self._ema_w = nn.Parameter(torch.Tensor(num_embeddings, self._embedding_dim))
-        self._ema_w.data.normal_()
-
-        self._decay = decay
-        self._epsilon = epsilon
-
-        self.name = name
-
-    def forward(self, inputs):
-        with record_function(self.name):
-            inputs = inputs.permute(0, 2, 3, 4, 1).contiguous()
-            input_shape = inputs.shape
-
-            flat_input = inputs.view(-1, self._embedding_dim)
-
-            distances = (
-                torch.sum(flat_input ** 2, dim=1, keepdim=True)
-                + torch.sum(self._embedding.weight ** 2, dim=1)
-                - 2 * torch.matmul(flat_input, self._embedding.weight.t())
-            )
-
-            encoding_indices = torch.argmin(distances, dim=1).unsqueeze(1)
-            encodings = torch.zeros(
-                encoding_indices.shape[0], self._num_embeddings, device=inputs.device
-            )
-            encodings.scatter_(1, encoding_indices, 1)
-
-            quantized = torch.matmul(encodings, self._embedding.weight).view(
-                input_shape
-            )
-
-            if self.training:
-                self._ema_cluster_size = self._ema_cluster_size * self._decay + (
-                    1 - self._decay
-                ) * torch.sum(encodings, 0)
-
-                n = torch.sum(self._ema_cluster_size.data)
-                self._ema_cluster_size = (
-                    (self._ema_cluster_size + self._epsilon)
-                    / (n + self._num_embeddings * self._epsilon)
-                    * n
-                )
-
-                dw = torch.matmul(encodings.t(), flat_input)
-                self._ema_w = nn.Parameter(
-                    self._ema_w * self._decay + (1 - self._decay) * dw
-                )
-
-                self._embedding.weight = nn.Parameter(
-                    self._ema_w / self._ema_cluster_size.unsqueeze(1)
-                )
-
-            e_latent_loss = F.mse_loss(quantized.detach(), inputs)
-            loss = self._commitment_cost * e_latent_loss
-
-            quantized = inputs + (quantized - inputs).detach()
-            avg_probs = torch.mean(encodings, dim=0)
-            perplexity = torch.exp(-torch.sum(avg_probs * torch.log(avg_probs + 1e-10)))
-
-        return (
-            loss,
-            quantized.permute(0, 4, 1, 2, 3).contiguous(),
-            perplexity,
-            encodings,
-            encoding_indices,
-        )
-
-
-class FixupBlock(nn.Module):
+class FixupBlock(torch.nn.Module):
+    # TODO: Decide if it requires Licensing
     # Adapted from:
     # https://github.com/hongyi-zhang/Fixup/blob/master/imagenet/models/fixup_resnet_imagenet.py#L20
 
@@ -375,17 +288,17 @@ class FixupBlock(nn.Module):
 
         assert identity_function in ["downsample", "upsample", "level"]
 
-        self.bias1a = nn.Parameter(data=torch.zeros(1), requires_grad=True)
-        self.bias1b = nn.Parameter(data=torch.zeros(1), requires_grad=True)
-        self.bias2a = nn.Parameter(data=torch.zeros(1), requires_grad=True)
-        self.bias2b = nn.Parameter(data=torch.zeros(1), requires_grad=True)
+        self.bias1a = torch.nn.Parameter(data=torch.zeros(1), requires_grad=True)
+        self.bias1b = torch.nn.Parameter(data=torch.zeros(1), requires_grad=True)
+        self.bias2a = torch.nn.Parameter(data=torch.zeros(1), requires_grad=True)
+        self.bias2b = torch.nn.Parameter(data=torch.zeros(1), requires_grad=True)
 
-        self.scale = nn.Parameter(data=torch.ones(1), requires_grad=True)
+        self.scale = torch.nn.Parameter(data=torch.ones(1), requires_grad=True)
 
-        self.activation = nn.LeakyReLU(inplace=False)
+        self.activation = torch.nn.LeakyReLU(inplace=False)
 
         if identity_function == "downsample":
-            self.skip_conv = nn.Conv3d(
+            self.skip_conv = torch.nn.Conv3d(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=3,
@@ -394,7 +307,7 @@ class FixupBlock(nn.Module):
                 bias=False,
             )
 
-            self.conv1 = nn.Conv3d(
+            self.conv1 = torch.nn.Conv3d(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=3,
@@ -403,7 +316,7 @@ class FixupBlock(nn.Module):
                 bias=False,
             )
         elif identity_function == "upsample":
-            self.skip_conv = nn.ConvTranspose3d(
+            self.skip_conv = torch.nn.ConvTranspose3d(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=4,
@@ -412,7 +325,7 @@ class FixupBlock(nn.Module):
                 bias=False,
             )
 
-            self.conv1 = nn.ConvTranspose3d(
+            self.conv1 = torch.nn.ConvTranspose3d(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=4,
@@ -422,7 +335,7 @@ class FixupBlock(nn.Module):
             )
 
         elif identity_function == "level":
-            self.skip_conv = nn.Conv3d(
+            self.skip_conv = torch.nn.Conv3d(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=3,
@@ -431,7 +344,7 @@ class FixupBlock(nn.Module):
                 bias=False,
             )
 
-            self.conv1 = nn.Conv3d(
+            self.conv1 = torch.nn.Conv3d(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=3,
@@ -440,7 +353,7 @@ class FixupBlock(nn.Module):
                 bias=False,
             )
 
-        self.conv2 = nn.Conv3d(
+        self.conv2 = torch.nn.Conv3d(
             in_channels=out_channels,
             out_channels=out_channels,
             kernel_size=3,
@@ -449,15 +362,15 @@ class FixupBlock(nn.Module):
             bias=False,
         )
 
-        self.nca = nn.Sequential(
-            nn.ConstantPad3d(padding=(1, 0, 1, 0, 1, 0), value=0),
-            nn.AvgPool3d(kernel_size=2, stride=1),
+        self.nca = torch.nn.Sequential(
+            torch.nn.ConstantPad3d(padding=(1, 0, 1, 0, 1, 0), value=0),
+            torch.nn.AvgPool3d(kernel_size=2, stride=1),
         )
 
         self.name = name
 
     def forward(self, input):
-        with record_function(self.name):
+        with torch.autograd.profiler.record_function(self.name):
             out = self.conv1(input + self.bias1a)
             out = self.nca(self.activation(out + self.bias1b))
 
@@ -471,7 +384,7 @@ class FixupBlock(nn.Module):
 
     def initialize_weights(self, num_layers):
 
-        nn.init.normal_(
+        torch.nn.init.normal_(
             tensor=self.conv1.weight,
             mean=0,
             std=np.sqrt(
@@ -479,8 +392,8 @@ class FixupBlock(nn.Module):
             )
             * num_layers ** (-0.5),
         )
-        nn.init.constant_(tensor=self.conv2.weight, val=0)
-        nn.init.normal_(
+        torch.nn.init.constant_(tensor=self.conv2.weight, val=0)
+        torch.nn.init.normal_(
             tensor=self.skip_conv.weight,
             mean=0,
             std=np.sqrt(
@@ -493,13 +406,13 @@ class FixupBlock(nn.Module):
         )
 
 
-class SubPixelConvolution3D(nn.Module):
+class SubPixelConvolution3D(torch.nn.Module):
     def __init__(self, in_channels, out_channels, upsample_factor, name):
         super(SubPixelConvolution3D, self).__init__()
         assert upsample_factor == 2
         self.upsample_factor = upsample_factor
 
-        self.conv = nn.Conv3d(
+        self.conv = torch.nn.Conv3d(
             in_channels=in_channels,
             out_channels=out_channels * 2 ** 3,
             kernel_size=3,
@@ -510,15 +423,15 @@ class SubPixelConvolution3D(nn.Module):
             upscale_factor=upsample_factor, name="PixelShuffle3D"
         )
 
-        self.nca = nn.Sequential(
-            nn.ConstantPad3d(padding=(1, 0, 1, 0, 1, 0), value=0),
-            nn.AvgPool3d(kernel_size=2, stride=1),
+        self.nca = torch.nn.Sequential(
+            torch.nn.ConstantPad3d(padding=(1, 0, 1, 0, 1, 0), value=0),
+            torch.nn.AvgPool3d(kernel_size=2, stride=1),
         )
 
         self.name = name
 
     def forward(self, input):
-        with record_function(self.name):
+        with torch.autograd.profiler.record_function(self.name):
             out = self.conv(input)
             out = self.shuffle(out)
             out = self.nca(out)
@@ -532,7 +445,7 @@ class SubPixelConvolution3D(nn.Module):
             int(self.conv.weight.shape[0] / (self.upsample_factor ** 2))
         ] + list(self.conv.weight.shape[1:])
         subkernel = torch.zeros(new_shape)
-        subkernel = nn.init.xavier_normal_(subkernel)
+        subkernel = torch.nn.init.xavier_normal_(subkernel)
         subkernel = subkernel.transpose(0, 1)
 
         subkernel = subkernel.contiguous().view(
@@ -553,7 +466,7 @@ class SubPixelConvolution3D(nn.Module):
         self.conv.weight.data = kernel
 
 
-class PixelShuffle3D(nn.Module):
+class PixelShuffle3D(torch.nn.Module):
     def __init__(self, upscale_factor, name):
         super(PixelShuffle3D, self).__init__()
         self.upscale_factor = upscale_factor
@@ -563,7 +476,7 @@ class PixelShuffle3D(nn.Module):
         self.name = name
 
     def forward(self, input):
-        with record_function(self.name):
+        with torch.autograd.profiler.record_function(self.name):
             shuffle_out = input.new()
 
             batch_size = input.size(0)

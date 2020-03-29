@@ -29,6 +29,15 @@ python3 experiment.py --training_data_directory /path/to/healthy/training/datase
 
 For fine-tuning please copy the baseline experiment directory, rename it, and start from it by changing the ``--starting_iteration`` to ``-1`` and ``--project_directory`` to the newly renamed folder
 
+The MMD and MS-SSIM calculations were done using the code provided by [1] which can be found [here](https://github.com/cyclomon/3dbraingen)
+
+For the Voxel-Based Morphometry we have used SPM 12 [2] and the Dice calculation was done based on SPM segmentation using NiftySeg [3]. 
+
+[1] Kwon, G., Han, C. and Kim, D.S., 2019, October. Generation of 3D brain MRI using auto-encoding generative adversarial networks. In International Conference on Medical Image Computing and Computer-Assisted Intervention (pp. 118-126). Springer, Cham.
+
+[2] https://www.fil.ion.ucl.ac.uk/spm/software/spm12/
+
+[3] Cardoso, M., Clarkson, M., Modat, M. and Ourselin, S., 2012. NiftySeg: open-source software for medical image segmentation, label fusion and cortical thickness estimation. In IEEE International Symposium on Biomedical Imaging, Barcelona, Spain.
 ## Citing
 ### Harvard
 
@@ -56,7 +65,7 @@ For collaboration purposes please [e-mail me](mailto:petru.tudosiu@kcl.ac.uk).
 ```
 MIT License
 
-Copyright (c) [2020] [Petru-Daniel Tudosiu]
+Copyright (c) 2020 Petru-Daniel Tudosiu
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
