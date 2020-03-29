@@ -213,8 +213,8 @@ class Quantization(torch.nn.Module):
 
         ar = {
             "q6": {"l": q6l, "eo": q6eo, "ei": q6ei, "p": q6p},
-            "q4": {"l": q4l, "eo": q4eo, "ei": q4ei, "p": q6p},
-            "q2": {"l": q2l, "eo": q2eo, "ei": q2ei, "p": q6p},
+            "q4": {"l": q4l, "eo": q4eo, "ei": q4ei, "p": q4p},
+            "q2": {"l": q2l, "eo": q2eo, "ei": q2ei, "p": q2p},
         }
 
         return q6, q4, q2, ar
@@ -278,8 +278,8 @@ class Decoder(torch.nn.Module):
 
         return out
 
+
 class FixupBlock(torch.nn.Module):
-    # TODO: Decide if it requires Licensing
     # Adapted from:
     # https://github.com/hongyi-zhang/Fixup/blob/master/imagenet/models/fixup_resnet_imagenet.py#L20
 
