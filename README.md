@@ -24,7 +24,7 @@ pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cud
 ## Experiments
 Overall command is:
 ```bash
-python3 experiment.py --training_data_directory /path/to/healthy/training/dataset/ --testing_data_directory /path/to/healthy/testing/dataset/ --project_directory /path/to/project/output/directory/ --experiment_name adaptive --device 1 --mode Training --starting_iteration -1 --epochs 20000 -log_every 10000 --checkpoint_every 10000 --checkpoint_last 5 --batch_size 2 --learning_rate 0.0001 --loss Baur --reconstruction_lambda 1.0 --zero_image_gradient_loss 100000 --one_image_gradient_loss 10000 --max_image_gradient_loss 5 --first_decay_steps 6480 --alpha 0.0000001 --t_mul 1.25 --m_mul 0.95
+python3 experiment.py --training_data_directory /path/to/healthy/training/dataset/ --testing_data_directory /path/to/healthy/testing/dataset/ --project_directory /path/to/project/output/directory/ --experiment_name adaptive --device 1 --mode Training --starting_iteration 0 --epochs 20000 -log_every 10000 --checkpoint_every 10000 --checkpoint_last 5 --batch_size 2 --learning_rate 0.0001 --loss Baur --reconstruction_lambda 1.0 --zero_image_gradient_loss 100000 --one_image_gradient_loss 10000 --max_image_gradient_loss 5 --first_decay_steps 6480 --alpha 0.0000001 --t_mul 1.25 --m_mul 0.95
 ```
 
 For fine-tuning please copy the baseline experiment directory, rename it, and start from it by changing the ``--starting_iteration`` to ``-1`` and ``--project_directory`` to the newly renamed folder
