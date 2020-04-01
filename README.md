@@ -9,6 +9,8 @@ I have not yet recreated the experiments from my paper. I am in the process of d
 I assume you are running a system Python version 3.6, otherwise please create a virtual environment with Python 3.6 
 
 ```bash
+sudo apt-get install ffmpeg
+
 git clone https://github.com/danieltudosiu/nmpevqvae.git 
 cd nmpevqvae
 python -m venv venv
