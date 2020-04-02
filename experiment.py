@@ -24,7 +24,7 @@ def unsupervised_training_function(
         optimizer.zero_grad()
 
         # Fetching the data from the batch and moving to device (TorchIO specific)
-        input = batch["t1"][DATA].to(device)
+        input = batch["T1"][DATA].to(device)
 
         output = model(input)
 
@@ -48,12 +48,12 @@ def unsupervised_training_function(
     return ignite.engine.Engine(process_function)
 
 
-def unsupervised_testing_function(model, loss_function, device):
+def unsupervised_inference_function(model, loss_function, device):
     def process_function(engine, batch):
         model.eval()
 
         with torch.no_grad():
-            input = batch["t1"][DATA].to(device)
+            input = batch["T1"][DATA].to(device)
 
             output = model(input)
 
@@ -146,7 +146,7 @@ model = model.to(device)
 if args.loss == "Baur":
     loss_function = losses.BaurLoss(lambda_reconstruction=args.reconstruction_lambda)
 else:
-    image_shape = iter(data_loader).__next__()["t1"]["data"].shape[1:]
+    image_shape = iter(data_loader).__next__()["T1"][DATA].shape[1:]
     image_shape = image_shape[1:] + (image_shape[0],)
 
     loss_function = losses.AdaptiveLoss(
@@ -181,7 +181,7 @@ if args.mode == utils.TRAINING:
         device=device
     )
 else:
-    engine = unsupervised_testing_function(
+    engine = unsupervised_inference_function(
         model=model,
         loss_function=loss_function,
         device=device

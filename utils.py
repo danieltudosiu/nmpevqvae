@@ -132,7 +132,7 @@ def get_data_loader(data_path, batch_size):
             subjects.append(
                 torchio.Subject(
                     torchio.Image(
-                        "t1", os.path.join(data_path, filename), torchio.INTENSITY
+                        "T1", os.path.join(data_path, filename), torchio.INTENSITY
                     )
                 )
             )
@@ -152,10 +152,8 @@ def get_torch_device(device):
         raise ValueError("You have not passed a GPU index.")
     else:
         try:
-            print(int(device))
             torch.cuda.set_device(int(device))
             torch_device = torch.device("cuda")
-            print(torch_device)
         except ValueError:
             raise ValueError(
                 "The device you have passed is not the index of a single GPU. Please pass and integer index of a single GPU."

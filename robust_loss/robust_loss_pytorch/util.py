@@ -196,22 +196,12 @@ def image_idct(dct_x):
 
 def volume_dct(image):
     """Does a type-II DCT (aka "The DCT") on axes 1 and 2 of a rank-3 tensor."""
-    # image = torch.as_tensor(image)
-    # dct_z = torch_dct.dct(image, norm="ortho").permute(0, 3, 1, 2)
-    # dct_y = torch_dct.dct(dct_z, norm="ortho").permute(0, 3, 1, 2)
-    # dct_x = torch_dct.dct(dct_y, norm="ortho").permute(0, 3, 1, 2)
-    # return dct_x
-    return torch_dct.dct_3d(torch.as_tensor(image))
+    return torch_dct.dct_3d(torch.as_tensor(image), norm="ortho")
 
 
 def volume_idct(dct_x):
     """Inverts image_dct(), by performing a type-III DCT."""
-    # dct_x = torch.as_tensor(dct_x)
-    # dct_y = torch_dct.idct(dct_x.permute(0, 3, 1, 2), norm="ortho")
-    # dct_z = torch_dct.idct(dct_y.permute(0, 3, 1, 2), norm="ortho")
-    # image = torch_dct.idct(dct_z.permute(0, 3, 1, 2), norm="ortho")
-
-    return torch_dct.idct_3d(torch.as_tensor(dct_x))
+    return torch_dct.idct_3d(torch.as_tensor(dct_x), norm="ortho")
 
 
 def compute_jacobian(f, x):
