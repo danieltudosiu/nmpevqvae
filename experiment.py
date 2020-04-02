@@ -69,54 +69,7 @@ def unsupervised_inference_function(model, loss_function, device):
     return ignite.engine.Engine(process_function)
 
 
-args = parser.cmd_parser.parse_args(
-    [
-        "--training_data_directory",
-        "/home/danieltudosiu/storage/datasets/neuro_morphology/healthy/train_192/",
-        "--testing_data_directory",
-        "/home/danieltudosiu/storage/datasets/neuro_morphology/healthy/test_192/",
-        "--project_directory",
-        "/home/danieltudosiu/storage/projects/nmpevqvae/",
-        "--experiment_name",
-        "adaptive",
-        "--device",
-        "1",
-        "--mode",
-        "Training",
-        "--starting_iteration",
-        "0",
-        "--epochs",
-        "20000",
-        "--log_every",
-        "10000",
-        "--checkpoint_every",
-        "10000",
-        "--checkpoint_last",
-        "5",
-        "--batch_size",
-        "2",
-        "--learning_rate",
-        "0.0001",
-        "--loss",
-        "Adaptive",
-        "--reconstruction_lambda",
-        "1.0",
-        "--zero_image_gradient_loss",
-        "100000",
-        "--one_image_gradient_loss",
-        "10000",
-        "--max_image_gradient_loss",
-        "5",
-        "--first_decay_steps",
-        "6480",
-        "--alpha",
-        "0.0000001",
-        "--t_mul",
-        "1.25",
-        "--m_mul",
-        "0.95",
-    ]
-)
+args = parser.cmd_parser.parse_args()
 params = vars(args)
 
 experiment_directory, checkpoint_directory, logs_directory, outputs_directory = utils.setup_directories(
