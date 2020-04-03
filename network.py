@@ -438,8 +438,8 @@ class SubPixelConvolution3D(torch.nn.Module):
         return out
 
     def initialize_weights(self):
-        # Code taken from:
-        # https://github.com/pytorch/pytorch/pull/5429/files
+        # Written by: Daniele Cattaneo (@catta202000)
+        # Taken from: https://github.com/pytorch/pytorch/pull/5429/files
 
         new_shape = [
             int(self.conv.weight.shape[0] / (self.upsample_factor ** 2))

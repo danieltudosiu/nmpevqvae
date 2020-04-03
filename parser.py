@@ -74,7 +74,7 @@ cmd_parser.add_argument(
     help="The period of steps after which we log.",
     action="store",
     type=int,
-    default=1000,
+    default=10000,
 )
 
 cmd_parser.add_argument(
@@ -82,7 +82,7 @@ cmd_parser.add_argument(
     help="The period of steps after which we checkpoint.",
     action="store",
     type=int,
-    default=1000,
+    default=10000,
 )
 
 cmd_parser.add_argument(
@@ -124,7 +124,7 @@ cmd_parser.add_argument(
     action="store",
     type=str,
     choices=["Baur", "Adaptive"],
-    default="adaptive",
+    default="Adaptive",
 )
 
 cmd_parser.add_argument(
